@@ -12,7 +12,7 @@ SilverBitcoin is an advanced blockchain platform combining AI-powered optimizati
 
 - **⚡ Ultra High Performance**: 1 second block times with 2M+ TPS verified (RTX 4090)
 - **🚀 AI-Powered Optimization**: MobileLLM-R1 load balancer with 50-60% efficiency gains
-- **🎮 GPU Acceleration**: CUDA/OpenCL support scaling from 2.35M to 100M+ TPS
+- **🎮 GPU Acceleration**: CUDA/OpenCL support scaling from 1M+ to 100M+ TPS
 - **🔒 Enterprise Security**: Congress consensus with Byzantine fault tolerance
 - **🛡️ Quantum-Resistant**: NIST ML-DSA (FIPS 204) post-quantum cryptography
 - **💰 Low Fees**: Minimal transaction costs with 500B gas limit
