@@ -75,16 +75,21 @@ echo -e "\n${YELLOW}[4/10] Cloning SilverBitcoin from GitHub...${NC}"
 GITHUB_REPO="https://github.com/baba-chain/SilverBitcoin.git"  
 
 if [ -d "$HOME/SilverBitcoin" ]; then
-    echo -e "${YELLOW}⚠️  Directory exists. Pulling latest changes...${NC}"
+    echo -e "${YELLOW}⚠️  Directory exists. Resetting to latest version...${NC}"
     cd $HOME/SilverBitcoin
-    git pull
+    
+    # Reset any local changes
+    git fetch origin
+    git reset --hard origin/main
+    git clean -fd
+    
+    echo -e "${GREEN}✅ Updated to latest version${NC}"
 else
     cd $HOME
     git clone $GITHUB_REPO
     cd SilverBitcoin
+    echo -e "${GREEN}✅ Project cloned${NC}"
 fi
-
-echo -e "${GREEN}✅ Project cloned/updated${NC}"
 
 # Step 5: Build Geth Binary
 echo -e "\n${YELLOW}[5/10] Building Geth binary...${NC}"
