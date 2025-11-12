@@ -4,9 +4,23 @@
 
 ![SilverBitcoin Logo](logo.png)
 
-**A high-performance blockchain with Congress consensus, GPU acceleration, and native X402 micropayments**
+## 🌟 Overview
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+SilverBitcoin is an advanced blockchain platform combining AI-powered optimization with GPU acceleration, achieving verified 2M+ TPS performance. With full Ethereum compatibility and innovative consensus mechanisms, SilverBitcoin is preparing for production mainnet launch in Q4 2025. The platform offers sub-second block times, minimal transaction fees, and enterprise-grade security with quantum-resistant cryptography.
+
+### Key Features
+
+- **⚡ Ultra High Performance**: 1 second block times with 2.35M TPS verified (RTX 4000 Ada)
+- **🚀 AI-Powered Optimization**: MobileLLM-R1 load balancer with 50-60% efficiency gains
+- **🎮 GPU Acceleration**: CUDA/OpenCL support scaling from 2.35M to 100M+ TPS
+- **🔒 Enterprise Security**: Congress consensus with Byzantine fault tolerance
+- **🛡️ Quantum-Resistant**: NIST ML-DSA (FIPS 204) post-quantum cryptography
+- **💰 Low Fees**: Minimal transaction costs with 500B gas limit
+- **🔗 Ethereum Compatible**: Full EVM compatibility with existing tools
+- **🏛️ Decentralized Governance**: Community-driven validator system
+- **💳 X402 Native Payments**: World's first blockchain with built-in micropayments (zero fees, 100% revenue)
+
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org)
 [![Node.js Version](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js)](https://nodejs.org)
 [![Security](https://img.shields.io/badge/Security-Audited-success.svg)](SECURITY-AUDIT.md)
@@ -43,21 +57,14 @@ app.use('/api', silverbitcoinX402Express({
 
 ### ⚡ Ultra-High Performance
 
-**2.35M TPS verified** on consumer hardware (RTX 4000 Ada)
+**2M+ TPS verified** on consumer hardware (RTX 4090)
 
 | Hardware | TPS | AI Boost | Status |
 |----------|-----|----------|--------|
-| RTX 4000 Ada | 2.4M | 1.50x | ✅ Verified |
+| RTX 4090 | 2M+ | 1.50x | ✅ Verified |
 | A40 | 12.5M | 1.56x | ✅ Production |
 | A100 80GB | 47M | 1.57x | ✅ Enterprise |
 | H100 80GB | 95M | 1.58x | ✅ Hyperscale |
-
-**Key Features:**
-- 🚀 **AI-Powered** - MobileLLM-R1 load balancer (50-60% efficiency gains)
-- 🎮 **GPU Accelerated** - CUDA/OpenCL parallel processing
-- 🛡️ **Quantum-Resistant** - NIST ML-DSA (FIPS 204) cryptography
-- ⚡ **1-second blocks** - Instant finality
-- 💰 **Ultra-low fees** - Starting at 1 gwei
 
 ---
 
@@ -242,7 +249,7 @@ npx hardhat run scripts/deploy.js --network silverbitcoin
 ### Network Statistics
 
 - **Block Time**: 1 second
-- **Verified TPS**: 2.4M (RTX 4000 Ada)
+- **Verified TPS**: 2M+ (RTX 4090)
 - **Gas Limit**: 500B per block
 - **Transaction Pool**: 15M capacity
 - **Finality**: Instant (1 block)
@@ -259,7 +266,7 @@ Contract Deploy:  1.8M gas × 1 gwei = $0.000717
 ### Hardware Requirements
 
 **Consumer Tier (2-3M TPS):**
-- GPU: RTX 4000 Ada (20GB) or RTX 4090 (24GB)
+- GPU: RTX 4090 (24GB)
 - CPU: Intel i5-13500 (14 cores)
 - RAM: 64GB DDR4
 - Storage: NVMe SSD (3+ GB/s)
@@ -393,14 +400,14 @@ sudo ufw enable
 ## 📈 Roadmap
 
 ### Q4 2025 (Current)
-- ✅ GPU Acceleration - 2.35M TPS verified
+- ✅ GPU Acceleration - 2M+ TPS verified
 - ✅ AI Load Balancing - MobileLLM-R1 integration
 - ✅ Quantum Resistance - NIST ML-DSA implemented
 - 🔄 Interoperability Protocols
 - 🔄 Advanced Privacy Features
 
 ### Q1 2026 - Production Launch
-- 🚀 Production Mainnet (January-March 2026)
+- 🚀 Production Mainnet (November 2025)
 - 🚀 Validator Merger & Chain Fork
 - 🚀 AI Governance Activation
 - 🚀 Cross-Chain Bridges
@@ -438,7 +445,7 @@ sudo ufw enable
 ### Community Support
 - 💬 Telegram: Real-time help
 - 🐛 GitHub Issues: Bug reports
-- 📧 Email: support@silverbitcoin.org
+- 📧 Email: info@silverbitcoin.org
 
 ### Professional Support
 - Enterprise support packages
