@@ -10,7 +10,7 @@ SilverBitcoin is an advanced blockchain platform combining AI-powered optimizati
 
 ### Key Features
 
-- **⚡ Ultra High Performance**: 1 second block times with 2.35M TPS verified (RTX 4000 Ada)
+- **⚡ Ultra High Performance**: 1 second block times with 2M+ TPS verified (RTX 4090)
 - **🚀 AI-Powered Optimization**: MobileLLM-R1 load balancer with 50-60% efficiency gains
 - **🎮 GPU Acceleration**: CUDA/OpenCL support scaling from 2.35M to 100M+ TPS
 - **🔒 Enterprise Security**: Congress consensus with Byzantine fault tolerance
@@ -150,7 +150,7 @@ Advanced Proof-of-Authority with:
 - **Fast Finality** - 1-second blocks
 - **Byzantine Fault Tolerance** - Secure validator rotation
 - **Energy Efficient** - No wasteful mining
-- **Scalable** - 2.35M+ TPS capability
+- **Scalable** - 2M+ TPS capability
 
 ### Validator Tiers
 
@@ -255,7 +255,7 @@ npx hardhat run scripts/deploy.js --network silverbitcoin
 - **Finality**: Instant (1 block)
 - **Uptime**: 99.9%+
 
-### Transaction Costs (SBTC = $0.38)
+### Transaction Costs (SBTC = $0.000025)
 
 ```
 Simple Transfer:  21,000 gas × 1 gwei = $0.000008
@@ -403,11 +403,11 @@ sudo ufw enable
 - ✅ GPU Acceleration - 2M+ TPS verified
 - ✅ AI Load Balancing - MobileLLM-R1 integration
 - ✅ Quantum Resistance - NIST ML-DSA implemented
+- ✅ Production Mainnet (November 2025)
 - 🔄 Interoperability Protocols
 - 🔄 Advanced Privacy Features
 
 ### Q1 2026 - Production Launch
-- 🚀 Production Mainnet (November 2025)
 - 🚀 Validator Merger & Chain Fork
 - 🚀 AI Governance Activation
 - 🚀 Cross-Chain Bridges
@@ -456,7 +456,7 @@ sudo ufw enable
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Creative Commons Attribution 4.0 International License (CC BY 4.0) - see [LICENSE](LICENSE) file for details.
 
 ---
 
