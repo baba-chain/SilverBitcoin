@@ -1,0 +1,21 @@
+// Copyright 2025 Silver Bitcoin Foundation
+
+//go:build !nacl && !js && cgo
+// +build !nacl,!js,cgo
+
+package rlp
+
+import (
+	"reflect"
+	"unsafe"
+)
+
+// byteArrayBytes returns a slice of the byte array v.
+func byteArrayBytes(v reflect.Value, length int) []byte {
+	var s []byte
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&s))
+	hdr.Data = v.UnsafeAddr()
+	hdr.Cap = length
+	hdr.Len = length
+	return s
+}

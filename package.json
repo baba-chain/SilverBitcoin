@@ -1,0 +1,64 @@
+{
+  "name": "silverbitcoin",
+  "version": "1.0.0",
+  "description": "SilverBitcoin - A high-performance blockchain with Congress consensus mechanism",
+  "main": "mainnet-verification.js",
+  "scripts": {
+    "start": "node mainnet-verification.js",
+    "verify": "node mainnet-verification.js",
+    "test": "npm run verify",
+    "setup": "cd System-Contracts && npm install",
+    "setup-blockchain": "./setup-blockchain-complete.sh",
+    "setup-debian": "sudo ./debian-quick-setup.sh",
+    "build-geth": "cd SilverBitcoin/node_src && go build -o ../geth ./cmd/geth",
+    "generate-keys": "./generate-node-keys.sh",
+    "init-nodes": "./initialize-nodes.sh",
+    "start-nodes": "./start-all-nodes.sh",
+    "stop-nodes": "./stop-all-nodes.sh",
+    "node-status": "./node-status.sh",
+    "compile-contracts": "cd System-Contracts && npx hardhat compile",
+    "deploy-contracts": "cd System-Contracts && npx hardhat run scripts/deploy.js --network silverbitcoin"
+  },
+  "keywords": [
+    "blockchain",
+    "mainnet",
+    "ethereum",
+    "congress",
+    "proof-of-authority",
+    "smart-contracts",
+    "web3",
+    "defi",
+    "validator",
+    "staking"
+  ],
+  "author": "SilverBitcoin Foundation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baba-chain/SilverBitcoin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/baba-chain/SilverBitcoin/issues"
+  },
+  "homepage": "https://github.com/baba-chain/SilverBitcoin#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0",
+    "go": ">=1.21.0"
+  },
+  "dependencies": {
+    "ethers": "^6.15.0"
+  },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0"
+  }
+}

@@ -1,0 +1,210 @@
+Creative Commons Attribution 4.0 International License (CC BY 4.0)
+
+Copyright (c) 2024-2025 SilverBitcoin Foundation
+All rights reserved.
+
+---
+
+## License Summary
+
+You are free to:
+
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+
+- **No additional restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+---
+
+## Full License Text
+
+This is a human-readable summary of (and not a substitute for) the license.
+
+### You are free to:
+
+**Share** — copy and redistribute the material in any medium or format for any purpose, even commercially.
+
+**Adapt** — remix, transform, and build upon the material for any purpose, even commercially.
+
+The licensor cannot revoke these freedoms as long as you follow the license terms.
+
+### Under the following terms:
+
+**Attribution** — You must give appropriate credit to SilverBitcoin Foundation, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+
+**No additional restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+### Notices:
+
+You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation.
+
+No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.
+
+---
+
+## Attribution Requirements
+
+When using this software, you must:
+
+1. **Credit the Creator**
+   - Name: SilverBitcoin Foundation
+   - Website: https://silverbitcoin.org
+   - GitHub: https://github.com/YOUR_USERNAME/SilverBitcoin
+
+2. **Link to License**
+   - Provide a link to: https://creativecommons.org/licenses/by/4.0/
+
+3. **Indicate Changes**
+   - If you modified the software, clearly state what changes were made
+   - Example: "Based on SilverBitcoin by SilverBitcoin Foundation, modified for [purpose]"
+
+4. **Example Attribution**
+   ```
+   This project uses SilverBitcoin blockchain software
+   Copyright (c) 2024-2025 SilverBitcoin Foundation
+   Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+   Source: https://github.com/YOUR_USERNAME/SilverBitcoin
+   ```
+
+---
+
+## Additional Terms for Blockchain Software
+
+### Blockchain Network
+This license applies to the SilverBitcoin blockchain software. The blockchain
+network itself is decentralized and operates independently of this software
+license.
+
+### Trademarks
+"SilverBitcoin", "SBTC", and the SilverBitcoin logo are trademarks of the
+SilverBitcoin Foundation. Use of these trademarks requires attribution as
+specified above. Commercial use of trademarks may require additional permission.
+
+### Patents
+This software may be covered by patents. The CC BY 4.0 License does not grant
+any patent rights beyond those necessary to use the software as licensed.
+
+### Third-Party Components
+This software includes components with different licenses:
+
+- **Go-Ethereum** (LGPL-3.0) - Modified for Congress consensus
+  - Source: https://github.com/ethereum/go-ethereum
+  - License: GNU Lesser General Public License v3.0
+
+- **Hardhat** (MIT) - Development tools
+  - Source: https://github.com/NomicFoundation/hardhat
+  - License: MIT License
+
+- **ethers.js** (MIT) - JavaScript library
+  - Source: https://github.com/ethers-io/ethers.js
+  - License: MIT License
+
+See individual component licenses for details.
+
+---
+
+## Disclaimer of Warranties
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+### Blockchain and Cryptocurrency Risks
+
+CRYPTOCURRENCY AND BLOCKCHAIN TECHNOLOGY INVOLVES SIGNIFICANT RISK. THIS
+SOFTWARE IS PROVIDED FOR USE AT YOUR OWN RISK. THE AUTHORS AND COPYRIGHT
+HOLDERS DISCLAIM ALL LIABILITY FOR ANY LOSSES, DAMAGES, OR CLAIMS ARISING
+FROM USE OF THIS SOFTWARE OR THE SILVERBITCOIN BLOCKCHAIN NETWORK.
+
+Users should:
+- ✅ Understand blockchain technology before using
+- ✅ Never invest more than they can afford to lose
+- ✅ Keep private keys secure and backed up
+- ✅ Comply with local laws and regulations
+- ✅ Verify all transactions before confirming
+- ✅ Conduct their own research (DYOR)
+- ✅ Consult with financial advisors when appropriate
+
+### Limitation of Liability
+
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+This includes but is not limited to:
+- Loss of funds or cryptocurrency
+- Network downtime or failures
+- Smart contract vulnerabilities
+- Regulatory or legal issues
+- Data loss or corruption
+- Security breaches
+
+---
+
+## Compliance and Legal
+
+### Regulatory Compliance
+Users are responsible for complying with all applicable laws and regulations
+in their jurisdiction, including but not limited to:
+- Securities laws
+- Anti-money laundering (AML) regulations
+- Know Your Customer (KYC) requirements
+- Tax reporting obligations
+- Data protection and privacy laws
+
+### Export Control
+This software may be subject to export control laws. Users are responsible
+for complying with all applicable export control regulations.
+
+### Sanctions
+Users must not use this software in violation of any applicable sanctions
+or embargoes.
+
+---
+
+## Contact Information
+
+### General Inquiries
+- **Website**: https://silverbitcoin.org
+- **Email**: info@silverbitcoin.org
+
+### Legal & Licensing
+- **Email**: legal@silverbitcoin.org
+
+### Technical Support
+- **Email**: support@silverbitcoin.org
+- **Telegram**: https://t.me/SilverBitcoinLabs
+- **GitHub**: https://github.com/YOUR_USERNAME/SilverBitcoin
+
+### Security Issues
+- **Email**: security@silverbitcoin.org
+- **PGP Key**: Available at https://silverbitcoin.org/security
+
+---
+
+## Full Legal Code
+
+For the complete legal code of the Creative Commons Attribution 4.0
+International License, please visit:
+
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+---
+
+## Version History
+
+- **v1.0** (November 2024) - Initial release with CC BY 4.0 license
+- **v2.0** (November 2025) - Added blockchain-specific terms and disclaimers
+
+---
+
+**Last Updated**: November 13, 2025
+
+**License Version**: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+**SPDX-License-Identifier**: CC-BY-4.0
