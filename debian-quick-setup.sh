@@ -20,9 +20,12 @@ echo -e "  1. Update system packages"
 echo -e "  2. Install Go 1.21.5"
 echo -e "  3. Install Node.js 20.x"
 echo -e "  4. Clone SilverBitcoin from GitHub"
-echo -e "  5. Build and setup blockchain"
-echo -e "  6. Configure firewall"
-echo -e "  7. Setup systemd service"
+echo -e "  5. Build Geth binary"
+echo -e "  6. Generate validator keys"
+echo -e "  7. Initialize nodes"
+echo -e "  8. Start validator nodes"
+echo -e "  9. Configure firewall"
+echo -e "  10. Setup systemd service"
 echo ""
 
 # Check if running as root
@@ -83,27 +86,75 @@ fi
 
 echo -e "${GREEN}✅ Project cloned/updated${NC}"
 
-# Step 5: Run Complete Blockchain Setup
-echo -e "\n${YELLOW}[5/10] Running blockchain setup...${NC}"
-if [ -f "setup-blockchain-complete.sh" ]; then
-    chmod +x setup-blockchain-complete.sh
-    echo "yes" | ./setup-blockchain-complete.sh
-    echo -e "${GREEN}✅ Blockchain setup completed${NC}"
+# Step 5: Build Geth Binary
+echo -e "\n${YELLOW}[5/10] Building Geth binary...${NC}"
+if [ -d "SilverBitcoin/node_src" ]; then
+    cd SilverBitcoin/node_src
+    
+    # Download Go dependencies
+    echo -e "${CYAN}Downloading Go dependencies...${NC}"
+    go mod download
+    go mod tidy
+    
+    # Build Geth
+    echo -e "${CYAN}Building Geth...${NC}"
+    go build -o geth ./cmd/geth
+    
+    # Move to parent directory
+    mv geth ../../
+    cd ../..
+    chmod +x geth
+    
+    echo -e "${GREEN}✅ Geth built successfully${NC}"
 else
-    echo -e "${RED}❌ setup-blockchain-complete.sh not found${NC}"
+    echo -e "${RED}❌ Geth source not found${NC}"
     exit 1
 fi
 
-# Step 6: Configure Firewall
-echo -e "\n${YELLOW}[6/10] Configuring firewall...${NC}"
+# Step 6: Generate Validator Keys
+echo -e "\n${YELLOW}[6/10] Generating validator keys...${NC}"
+if [ -f "generate-node-keys.sh" ]; then
+    chmod +x generate-node-keys.sh
+    echo "yes" | ./generate-node-keys.sh
+    echo -e "${GREEN}✅ Keys generated${NC}"
+else
+    echo -e "${RED}❌ generate-node-keys.sh not found${NC}"
+    exit 1
+fi
+
+# Step 7: Initialize Nodes
+echo -e "\n${YELLOW}[7/10] Initializing nodes...${NC}"
+if [ -f "initialize-nodes.sh" ]; then
+    chmod +x initialize-nodes.sh
+    ./initialize-nodes.sh
+    echo -e "${GREEN}✅ Nodes initialized${NC}"
+else
+    echo -e "${RED}❌ initialize-nodes.sh not found${NC}"
+    exit 1
+fi
+
+# Step 8: Start Nodes
+echo -e "\n${YELLOW}[8/10] Starting validator nodes...${NC}"
+if [ -f "start-all-nodes.sh" ]; then
+    chmod +x start-all-nodes.sh
+    chmod +x start-node.sh
+    ./start-all-nodes.sh
+    echo -e "${GREEN}✅ Nodes started${NC}"
+else
+    echo -e "${RED}❌ start-all-nodes.sh not found${NC}"
+    exit 1
+fi
+
+# Step 9: Configure Firewall
+echo -e "\n${YELLOW}[9/10] Configuring firewall...${NC}"
 ufw --force enable
 ufw allow 22/tcp
 ufw allow 30304:30328/tcp
 ufw allow 30304:30328/udp
 echo -e "${GREEN}✅ Firewall configured${NC}"
 
-# Step 7: Setup Systemd Service
-echo -e "\n${YELLOW}[7/10] Setting up systemd service...${NC}"
+# Step 10: Setup Systemd Service
+echo -e "\n${YELLOW}[10/10] Setting up systemd service...${NC}"
 cat > /etc/systemd/system/silverbitcoin.service << EOF
 [Unit]
 Description=SilverBitcoin Blockchain Network
