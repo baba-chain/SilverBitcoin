@@ -12,7 +12,7 @@ SilverBitcoin is an advanced blockchain platform combining AI-powered optimizati
 
 - **⚡ Ultra High Performance**: 1 second block times with 2M+ TPS verified (RTX 4090)
 - **🚀 AI-Powered Optimization**: MobileLLM-R1 load balancer with 50-60% efficiency gains
-- **🎮 GPU Acceleration**: CUDA/OpenCL support scaling from 1M+ to 100M+ TPS
+- **🎮 GPU Acceleration**: CUDA/OpenCL support scaling from 2.35M to 100M+ TPS
 - **🔒 Enterprise Security**: Congress consensus with Byzantine fault tolerance
 - **🛡️ Quantum-Resistant**: NIST ML-DSA (FIPS 204) post-quantum cryptography
 - **💰 Low Fees**: Minimal transaction costs with 500B gas limit
@@ -28,6 +28,50 @@ SilverBitcoin is an advanced blockchain platform combining AI-powered optimizati
 [Website](https://silverbitcoin.org) • [Explorer](https://blockchain.silverbitcoin.org) • [Whitepaper](https://silverbitcoin.org/whitepaper) • [Telegram](https://t.me/SilverBitcoinLabs)
 
 </div>
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Ubuntu 24.04 - Tek komutla kurulum
+scripts/setup/setup-blockchain-complete.sh
+# veya: npm run setup-blockchain
+
+# Node'ları başlat
+scripts/node-management/start-all-nodes.sh
+# veya: npm run start-nodes
+
+# Durum kontrol
+scripts/node-management/node-status.sh
+# veya: npm run node-status
+```
+
+**Detaylı kurulum**: [QUICK-START.md](QUICK-START.md) | [UBUNTU-SETUP.md](UBUNTU-SETUP.md)
+
+**Script Dokümantasyonu**: [scripts/README.md](scripts/README.md)
+
+---
+
+## 📁 Proje Yapısı
+
+```
+SilverBitcoin/
+├── scripts/              # Tüm yönetim scriptleri (düzenli klasör yapısı)
+│   ├── setup/           # Kurulum scriptleri
+│   ├── node-management/ # Node başlatma/durdurma
+│   ├── maintenance/     # Bakım ve güncelleme
+│   ├── auto-start/      # Otomatik başlatma servisleri
+│   ├── deployment/      # Deployment araçları
+│   └── utilities/       # Yardımcı araçlar
+├── docs/                # Dokümantasyon
+│   └── setup-guides/    # Kurulum rehberleri
+├── SilverBitcoin/       # Geth kaynak kodu
+├── System-Contracts/    # Smart contract'lar
+└── nodes/               # Node data dizinleri
+```
+
+**Not**: Tüm scriptler `scripts/` klasöründe düzenli bir yapıda organize edilmiştir. npm scripts kullanarak veya doğrudan çalıştırabilirsiniz.
 
 ---
 

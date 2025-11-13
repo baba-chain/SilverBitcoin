@@ -8,14 +8,16 @@
     "verify": "node mainnet-verification.js",
     "test": "npm run verify",
     "setup": "cd System-Contracts && npm install",
-    "setup-blockchain": "./setup-blockchain-complete.sh",
-    "setup-debian": "sudo ./debian-quick-setup.sh",
+    "setup-blockchain": "./scripts/setup/setup-blockchain-complete.sh",
     "build-geth": "cd SilverBitcoin/node_src && go build -o ../geth ./cmd/geth",
-    "generate-keys": "./generate-node-keys.sh",
-    "init-nodes": "./initialize-nodes.sh",
-    "start-nodes": "./start-all-nodes.sh",
-    "stop-nodes": "./stop-all-nodes.sh",
-    "node-status": "./node-status.sh",
+    "generate-keys": "./scripts/setup/generate-node-keys.sh",
+    "init-nodes": "./scripts/setup/initialize-nodes.sh",
+    "start-nodes": "./scripts/node-management/start-all-nodes.sh",
+    "stop-nodes": "./scripts/node-management/stop-all-nodes.sh",
+    "node-status": "./scripts/node-management/node-status.sh",
+    "troubleshoot": "./scripts/maintenance/troubleshoot.sh",
+    "quick-test": "./scripts/maintenance/quick-test.sh",
+    "update-deps": "./scripts/maintenance/update-dependencies.sh",
     "compile-contracts": "cd System-Contracts && npx hardhat compile",
     "deploy-contracts": "cd System-Contracts && npx hardhat run scripts/deploy.js --network silverbitcoin"
   },
@@ -32,7 +34,7 @@
     "staking"
   ],
   "author": "SilverBitcoin Foundation",
-  "license": "MIT",
+  "license": "CC-BY-4.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/baba-chain/SilverBitcoin.git"
