@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SilverBitcoin - Complete Blockchain Setup
-# This script does EVERYTHING: build, generate keys, update genesis, initialize, start
+# This script does EVERYTHING: system update, dependencies, build, generate keys, initialize, start
 
 set -e
 
@@ -16,6 +16,7 @@ echo -e "${CYAN}║   🚀 SilverBitcoin - Complete Blockchain Setup            
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${YELLOW}This will:${NC}"
+echo -e "  0. Check and install system dependencies"
 echo -e "  1. Build Geth binary"
 echo -e "  2. Generate validator private keys"
 echo -e "  3. Update genesis.json with new addresses"
@@ -33,9 +34,64 @@ fi
 
 echo ""
 
+# Step 0: Check and Install Dependencies
+echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║   Step 0/6: Checking System Dependencies                   ║${NC}"
+echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+# Check if running as root or with sudo
+if [ "$EUID" -ne 0 ]; then
+    SUDO="sudo"
+    echo -e "${YELLOW}Running with sudo...${NC}"
+else
+    SUDO=""
+    echo -e "${YELLOW}Running as root...${NC}"
+fi
+
+# Check Go version
+GO_VERSION=$(go version 2>/dev/null | awk '{print $3}' | sed 's/go//')
+GO_REQUIRED="1.21"
+
+if [ -z "$GO_VERSION" ]; then
+    echo -e "${YELLOW}Go not found. Installing...${NC}"
+    $SUDO apt update -qq
+    $SUDO apt install -y golang-go
+else
+    echo -e "${GREEN}✓ Go $GO_VERSION installed${NC}"
+fi
+
+# Check other dependencies
+PACKAGES="git build-essential tmux curl wget openssl libgmp-dev libssl-dev pkg-config"
+MISSING_PACKAGES=""
+
+for pkg in $PACKAGES; do
+    if ! dpkg -l | grep -q "^ii  $pkg "; then
+        MISSING_PACKAGES="$MISSING_PACKAGES $pkg"
+    fi
+done
+
+if [ ! -z "$MISSING_PACKAGES" ]; then
+    echo -e "${YELLOW}Installing missing packages:$MISSING_PACKAGES${NC}"
+    $SUDO apt update -qq
+    $SUDO apt install -y $MISSING_PACKAGES
+    echo -e "${GREEN}✓ Packages installed${NC}"
+else
+    echo -e "${GREEN}✓ All required packages installed${NC}"
+fi
+
+# Copy genesis.json if not exists
+if [ ! -f "genesis.json" ] && [ -f "SilverBitcoin/genesis.json" ]; then
+    echo -e "${YELLOW}Copying genesis.json...${NC}"
+    cp SilverBitcoin/genesis.json .
+    echo -e "${GREEN}✓ Genesis.json copied${NC}"
+fi
+
+echo ""
+
 # Step 1: Build Geth
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   Step 1/5: Building Geth                                  ║${NC}"
+echo -e "${CYAN}║   Step 1/6: Building Geth                                  ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -43,12 +99,26 @@ if [ ! -f "geth" ]; then
     if [ -d "SilverBitcoin/node_src" ]; then
         echo -e "${YELLOW}Building Geth from source...${NC}"
         cd SilverBitcoin/node_src
+        
+        # Download Go modules
+        echo -e "${YELLOW}Downloading Go modules...${NC}"
         go mod download
+        go mod tidy
+        
+        # Build Geth
+        echo -e "${YELLOW}Compiling Geth (this may take a few minutes)...${NC}"
         go build -o geth ./cmd/geth
-        mv geth ../../
-        cd ../..
-        chmod +x geth
-        echo -e "${GREEN}✅ Geth built successfully${NC}"
+        
+        if [ -f "geth" ]; then
+            mv geth ../../
+            cd ../..
+            chmod +x geth
+            echo -e "${GREEN}✅ Geth built successfully${NC}"
+        else
+            echo -e "${RED}❌ Geth build failed${NC}"
+            cd ../..
+            exit 1
+        fi
     else
         echo -e "${RED}❌ Geth source not found at SilverBitcoin/node_src${NC}"
         exit 1
@@ -61,7 +131,7 @@ echo ""
 
 # Step 2: Generate Keys
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   Step 2/5: Generating Validator Keys                      ║${NC}"
+echo -e "${CYAN}║   Step 2/6: Generating Validator Keys                      ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -82,7 +152,7 @@ echo ""
 
 # Step 4: Initialize Nodes
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   Step 4/5: Initializing Nodes                             ║${NC}"
+echo -e "${CYAN}║   Step 4/6: Initializing Nodes                             ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -98,7 +168,7 @@ echo ""
 
 # Step 5: Start Nodes
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   Step 5/5: Starting Validator Nodes                       ║${NC}"
+echo -e "${CYAN}║   Step 5/6: Starting Validator Nodes                       ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
