@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-ethers");
+require("dotenv").config();
 
 module.exports = {
   solidity: {
@@ -19,32 +20,29 @@ module.exports = {
   networks: {
     hardhat: {},
 
-    // SilverBitcoin Network Configuration
+    // SilverBitcoin Production Mainnet
     silverbitcoin: {
-      url: "http://34.122.141.167:8546",
+      url: "https://mainnet-rpc.silverbitcoin.org/",
       chainId: 5200,
-      // Let Hardhat automatically query gas price from the network
-      gasPrice: "auto", // This will query eth_gasPrice RPC method
-
-      // Alternative: Use EIP-1559 format (recommended)
-      // maxFeePerGas: "auto",
-      // maxPriorityFeePerGas: "auto",
-
-      // For testing, you can set accounts if needed
-      // accounts: ["0x..."] // Add private keys for testing
-
-      // Network timeout settings
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      gasPrice: "auto",
       timeout: 60000,
-
-      // Gas settings
       gas: "auto",
-      gasMultiplier: 1.2, // Add 20% buffer to gas estimates
+      gasMultiplier: 1.2,
     },
+
+    // SilverBitcoin Test Server
+    silverbitcoin_test: {
+      url: process.env.RPC_URL || "http://34.122.141.167:8546",
+      chainId: 5200,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      gasP
 
     // Local development network (if running locally)
     local: {
       url: "http://localhost:8546",
       chainId: 5200,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: "auto",
       gas: "auto",
       gasMultiplier: 1.2,
