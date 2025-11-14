@@ -107,12 +107,12 @@ if [ "$NODE_NUM" -eq 25 ]; then
         --http \
         --http.addr 0.0.0.0 \
         --http.port $HTTP_PORT \
-        --http.api eth,net,web3,personal,admin \
+        --http.api eth,net,web3,personal,admin,clique \
         --http.corsdomain '*' \
         --ws \
         --ws.addr 0.0.0.0 \
         --ws.port $WS_PORT \
-        --ws.api eth,net,web3,personal,admin \
+        --ws.api eth,net,web3,personal,admin,clique \
         --ws.origins '*' \
         --syncmode full \
         --gcmode archive \
@@ -128,12 +128,12 @@ else
         --http \
         --http.addr 0.0.0.0 \
         --http.port $HTTP_PORT \
-        --http.api eth,net,web3,personal,admin,miner \
+        --http.api eth,net,web3,personal,admin,miner,clique \
         --http.corsdomain '*' \
         --ws \
         --ws.addr 0.0.0.0 \
         --ws.port $WS_PORT \
-        --ws.api eth,net,web3,personal,admin,miner \
+        --ws.api eth,net,web3,personal,admin,miner,clique \
         --ws.origins '*' \
         --mine \
         --miner.etherbase $ADDRESS \
