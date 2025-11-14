@@ -1,9 +1,89 @@
 #!/bin/bash
 
-# SilverBitcoin - Complete Blockchain Setup
-# This script does EVERYTHING: system update, dependencies, build, generate keys, initialize, start
+################################################################################
+# SilverBitcoin - Complete Blockchain Setup Script
+################################################################################
+#
+# DESCRIPTION:
+#   This script provides a complete, automated setup for the SilverBitcoin
+#   blockchain network. It handles all aspects of deployment including:
+#   - System dependency installation
+#   - Go version management (automatic detection and installation)
+#   - Geth compilation from source
+#   - Validator key generation
+#   - Genesis block initialization
+#   - Node startup and configuration
+#
+# COMPATIBILITY:
+#   - Ubuntu 22.04 LTS (Jammy Jellyfish)
+#   - Ubuntu 24.04 LTS (Noble Numbat)
+#   - Ubuntu 25.10 (Oracular Oriole)
+#
+# GO VERSION REQUIREMENTS:
+#   This script requires Go 1.21 or 1.22 for Geth compilation.
+#   Go 1.23+ is NOT compatible due to breaking changes in the runtime package.
+#
+#   Technical Details:
+#   - Go 1.23+ removed/changed the runtime.stopTheWorld API
+#   - The dependency github.com/fjl/memsize (used by go-ethereum) relies on
+#     internal runtime APIs that changed in Go 1.23
+#   - This causes compilation errors: "invalid reference to runtime.stopTheWorld"
+#
+#   Automatic Go Management:
+#   - The script automatically detects your current Go version
+#   - If incompatible (1.23+) or missing, it installs Go 1.22
+#   - Multiple Go versions can coexist using update-alternatives
+#   - The correct version is automatically selected for the build
+#
+# USAGE:
+#   ./setup-blockchain-complete.sh
+#
+#   The script will:
+#   1. Check and install system dependencies
+#   2. Detect and validate Go installation
+#   3. Install compatible Go version if needed
+#   4. Build Geth binary from source
+#   5. Generate validator private keys (25 nodes)
+#   6. Update genesis.json with validator addresses
+#   7. Initialize genesis block for all nodes
+#   8. Start all validator nodes in tmux sessions
+#
+# PREREQUISITES:
+#   - Ubuntu 22.04, 24.04, or 25.10
+#   - Sudo privileges (for package installation)
+#   - Internet connection (for downloading Go and modules)
+#   - At least 2GB free disk space
+#   - At least 2GB RAM
+#
+# SECURITY NOTES:
+#   - This script generates private keys for validator nodes
+#   - Keys are stored in nodes/Node*/keystore/
+#   - NEVER commit these keys to version control
+#   - The .gitignore file protects these directories
+#   - Run this script ONLY on the server, not on development machines
+#
+# TROUBLESHOOTING:
+#   If the script fails:
+#   1. Check the error message - it provides specific guidance
+#   2. Verify internet connectivity
+#   3. Ensure sufficient disk space: df -h
+#   4. Check Go version: go version
+#   5. Review logs in the output above
+#
+#   Common Issues:
+#   - "runtime.stopTheWorld" error: Go 1.23+ detected, script will auto-fix
+#   - Module download failures: Check network/proxy settings
+#   - Permission denied: Run with sudo or fix directory permissions
+#   - Disk space errors: Free up space and retry
+#
+# SUPPORT:
+#   - Documentation: See README.md
+#   - Issues: GitHub Issues
+#   - Community: GitHub Discussions
+#
+################################################################################
 
-set -e
+set -e  # Exit immediately if any command fails
 
 # Get the project root directory (2 levels up from scripts/setup/)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,11 +92,24 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # Change to project root
 cd "$PROJECT_ROOT"
 
+# Color codes for output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
+
+# Load Go version manager module
+# This provides complete Go detection, validation, and installation functionality
+GO_VERSION_MANAGER="$SCRIPT_DIR/go-version-manager.sh"
+if [ -f "$GO_VERSION_MANAGER" ]; then
+    source "$GO_VERSION_MANAGER"
+    echo -e "${GREEN}✓ Go version manager loaded${NC}"
+else
+    echo -e "${RED}✗ Go version manager not found: $GO_VERSION_MANAGER${NC}"
+    echo -e "${YELLOW}Please ensure go-version-manager.sh exists in scripts/setup/${NC}"
+    exit 1
+fi
 
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║   🚀 SilverBitcoin - Complete Blockchain Setup            ║${NC}"
@@ -56,22 +149,127 @@ else
     echo -e "${YELLOW}Running as root...${NC}"
 fi
 
-# Check Go version
-GO_VERSION=$(go version 2>/dev/null | awk '{print $3}' | sed 's/go//')
-GO_REQUIRED="1.21"
+#######################################
+# GO VERSION DETECTION AND MANAGEMENT
+# This section uses the go-version-manager module to:
+# 1. Detect current Go installation
+# 2. Validate compatibility (requires Go 1.21 or 1.22)
+# 3. Automatically install compatible version if needed
+# 4. Configure system PATH for Go access
+#######################################
 
-if [ -z "$GO_VERSION" ]; then
-    echo -e "${YELLOW}Go not found. Installing Go 1.22...${NC}"
-    $SUDO apt update -qq
-    # Ubuntu 24.04 has Go 1.22 in repos
-    $SUDO apt install -y golang-1.22 || $SUDO apt install -y golang-go
-    # Add Go to PATH if needed
-    if [ ! -f "/usr/bin/go" ] && [ -f "/usr/lib/go-1.22/bin/go" ]; then
-        $SUDO ln -sf /usr/lib/go-1.22/bin/go /usr/bin/go
-    fi
-else
-    echo -e "${GREEN}✓ Go $GO_VERSION installed${NC}"
-fi
+echo -e "${CYAN}Checking Go installation and compatibility...${NC}"
+echo ""
+
+# Perform complete Go version check
+# Returns: 0 = compatible, 1 = not found, 2 = incompatible
+check_go_version_complete
+GO_CHECK_RESULT=$?
+
+echo ""
+
+# Handle different scenarios based on check result
+case $GO_CHECK_RESULT in
+    0)
+        # Go is installed and compatible - proceed with build
+        echo -e "${GREEN}✅ Go is ready for Geth compilation${NC}"
+        echo ""
+        ;;
+    1)
+        # Go is not installed - install it
+        echo -e "${YELLOW}⚠️  Go is not installed${NC}"
+        echo -e "${CYAN}Installing compatible Go version...${NC}"
+        echo ""
+        
+        if install_compatible_go "$SUDO"; then
+            echo ""
+            echo -e "${GREEN}✅ Go installed successfully${NC}"
+            
+            # Configure system PATH
+            if [ -n "$GO_INSTALL_PATH" ]; then
+                echo ""
+                if configure_go_system_path "$GO_INSTALL_PATH" "$SUDO"; then
+                    echo -e "${GREEN}✅ Go configured in system PATH${NC}"
+                else
+                    echo -e "${YELLOW}⚠️  Manual PATH configuration may be needed${NC}"
+                fi
+            fi
+            
+            # Re-check to confirm installation
+            echo ""
+            echo -e "${CYAN}Verifying installation...${NC}"
+            if check_go_version_complete; then
+                echo -e "${GREEN}✅ Go installation verified${NC}"
+            else
+                echo -e "${RED}✗ Go installation verification failed${NC}"
+                exit 1
+            fi
+        else
+            echo ""
+            echo -e "${RED}✗ Failed to install Go${NC}"
+            echo -e "${YELLOW}Please install Go manually and re-run this script${NC}"
+            exit 1
+        fi
+        echo ""
+        ;;
+    2)
+        # Go is installed but incompatible version
+        echo -e "${YELLOW}⚠️  Incompatible Go version detected${NC}"
+        echo -e "${CYAN}Current version: ${GO_VERSION_FULL}${NC}"
+        echo -e "${CYAN}Required: Go 1.21 or 1.22${NC}"
+        echo ""
+        echo -e "${YELLOW}Go 1.23+ has breaking changes that prevent Geth compilation${NC}"
+        echo -e "${YELLOW}Specifically: runtime.stopTheWorld API changes affect github.com/fjl/memsize${NC}"
+        echo ""
+        
+        read -p "Install compatible Go version alongside current installation? (yes/no): " install_compat
+        
+        if [ "$install_compat" = "yes" ] || [ "$install_compat" = "y" ]; then
+            echo ""
+            echo -e "${CYAN}Installing compatible Go version...${NC}"
+            echo ""
+            
+            if install_compatible_go "$SUDO"; then
+                echo ""
+                echo -e "${GREEN}✅ Compatible Go installed${NC}"
+                
+                # Configure system PATH
+                if [ -n "$GO_INSTALL_PATH" ]; then
+                    echo ""
+                    if configure_go_system_path "$GO_INSTALL_PATH" "$SUDO"; then
+                        echo -e "${GREEN}✅ Go configured in system PATH${NC}"
+                    else
+                        echo -e "${YELLOW}⚠️  Manual PATH configuration may be needed${NC}"
+                    fi
+                fi
+                
+                # Re-check to confirm
+                echo ""
+                echo -e "${CYAN}Verifying installation...${NC}"
+                if check_go_version_complete; then
+                    echo -e "${GREEN}✅ Compatible Go is now active${NC}"
+                else
+                    echo -e "${RED}✗ Verification failed${NC}"
+                    exit 1
+                fi
+            else
+                echo ""
+                echo -e "${RED}✗ Failed to install compatible Go${NC}"
+                exit 1
+            fi
+        else
+            echo ""
+            echo -e "${RED}✗ Cannot proceed without compatible Go version${NC}"
+            echo -e "${YELLOW}Please install Go 1.21 or 1.22 manually${NC}"
+            exit 1
+        fi
+        echo ""
+        ;;
+    *)
+        echo -e "${RED}✗ Unexpected error during Go version check${NC}"
+        exit 1
+        ;;
+esac
 
 # Check other dependencies
 PACKAGES="git build-essential tmux curl wget openssl libgmp-dev libssl-dev pkg-config python3"
@@ -125,24 +323,180 @@ if [ ! -f "geth" ]; then
     
     if [ -n "$GETH_SRC_DIR" ]; then
         echo -e "${YELLOW}Building Geth from source ($GETH_SRC_DIR)...${NC}"
+        
+        #######################################
+        # CONFIGURE BUILD ENVIRONMENT
+        # Set up Go environment variables to ensure correct Go version is used
+        # This is critical for Ubuntu 25.10 where system Go might be 1.23+
+        #######################################
+        
+        echo ""
+        echo -e "${CYAN}Configuring build environment...${NC}"
+        
+        # Determine which Go binary to use
+        # Priority: 1. GO_BINARY_PATH from version check, 2. System go command
+        BUILD_GO_BINARY=""
+        if [ -n "$GO_BINARY_PATH" ] && [ -x "$GO_BINARY_PATH" ]; then
+            BUILD_GO_BINARY="$GO_BINARY_PATH"
+            echo -e "${GREEN}✓ Using Go from: $BUILD_GO_BINARY${NC}"
+        elif command -v go &>/dev/null; then
+            BUILD_GO_BINARY=$(command -v go)
+            echo -e "${GREEN}✓ Using system Go: $BUILD_GO_BINARY${NC}"
+        else
+            echo -e "${RED}✗ No Go binary found${NC}"
+            echo -e "${YELLOW}This should not happen after Go installation${NC}"
+            exit 1
+        fi
+        
+        # Get GOROOT from the Go binary
+        BUILD_GOROOT=$($BUILD_GO_BINARY env GOROOT 2>/dev/null)
+        if [ -z "$BUILD_GOROOT" ]; then
+            # Fallback: derive GOROOT from binary path
+            BUILD_GOROOT=$(dirname $(dirname "$BUILD_GO_BINARY"))
+            echo -e "${YELLOW}⚠ GOROOT derived from binary path: $BUILD_GOROOT${NC}"
+        else
+            echo -e "${GREEN}✓ GOROOT: $BUILD_GOROOT${NC}"
+        fi
+        
+        # Validate GOROOT exists
+        if [ ! -d "$BUILD_GOROOT" ]; then
+            echo -e "${RED}✗ GOROOT directory does not exist: $BUILD_GOROOT${NC}"
+            exit 1
+        fi
+        
+        # Set up Go environment variables
+        # These ensure the build uses the correct Go version
+        export GOROOT="$BUILD_GOROOT"
+        export GOPATH="${HOME}/go"
+        export GO111MODULE=on
+        export CGO_ENABLED=1
+        
+        # Construct PATH with Go binary directory first
+        # This ensures our compatible Go version takes precedence
+        GO_BIN_DIR="$BUILD_GOROOT/bin"
+        if [ -d "$GO_BIN_DIR" ]; then
+            # Remove any existing Go paths to prevent conflicts
+            PATH_WITHOUT_GO=$(echo "$PATH" | tr ':' '\n' | grep -v '/go' | tr '\n' ':' | sed 's/:$//')
+            export PATH="$GO_BIN_DIR:$PATH_WITHOUT_GO"
+            echo -e "${GREEN}✓ PATH configured with Go binary directory first${NC}"
+        else
+            echo -e "${YELLOW}⚠ Go bin directory not found: $GO_BIN_DIR${NC}"
+        fi
+        
+        # Verify the environment configuration
+        echo ""
+        echo -e "${CYAN}Verifying build environment...${NC}"
+        
+        # Check which go binary will be used
+        ACTIVE_GO=$(command -v go)
+        ACTIVE_GO_VERSION=$(go version 2>/dev/null | grep -oE 'go[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1 | sed 's/^go//')
+        
+        if [ "$ACTIVE_GO" = "$BUILD_GO_BINARY" ]; then
+            echo -e "${GREEN}✓ Correct Go binary is active: $ACTIVE_GO${NC}"
+            echo -e "${GREEN}✓ Version: $ACTIVE_GO_VERSION${NC}"
+        else
+            echo -e "${YELLOW}⚠ Active Go differs from expected${NC}"
+            echo -e "${YELLOW}  Expected: $BUILD_GO_BINARY${NC}"
+            echo -e "${YELLOW}  Active: $ACTIVE_GO${NC}"
+        fi
+        
+        # Display environment summary
+        echo ""
+        echo -e "${CYAN}Build Environment Summary:${NC}"
+        echo -e "${CYAN}  GOROOT:      ${NC}$GOROOT"
+        echo -e "${CYAN}  GOPATH:      ${NC}$GOPATH"
+        echo -e "${CYAN}  GO111MODULE: ${NC}$GO111MODULE"
+        echo -e "${CYAN}  CGO_ENABLED: ${NC}$CGO_ENABLED"
+        echo -e "${CYAN}  Go Binary:   ${NC}$ACTIVE_GO"
+        echo -e "${CYAN}  Go Version:  ${NC}$ACTIVE_GO_VERSION"
+        echo ""
+        
+        # Verify Go version is compatible before building
+        # Parse version to check compatibility
+        GO_BUILD_MAJOR=$(echo "$ACTIVE_GO_VERSION" | cut -d. -f1)
+        GO_BUILD_MINOR=$(echo "$ACTIVE_GO_VERSION" | cut -d. -f2)
+        
+        if [ "$GO_BUILD_MAJOR" = "1" ] && ([ "$GO_BUILD_MINOR" = "21" ] || [ "$GO_BUILD_MINOR" = "22" ]); then
+            echo -e "${GREEN}✓ Go version is compatible for Geth build${NC}"
+        else
+            echo -e "${RED}✗ Go version $ACTIVE_GO_VERSION is not compatible${NC}"
+            echo -e "${YELLOW}Required: Go 1.21 or 1.22${NC}"
+            echo -e "${YELLOW}This should not happen after version check${NC}"
+            exit 1
+        fi
+        
+        echo ""
+        echo -e "${GREEN}✅ Build environment configured successfully${NC}"
+        echo ""
+        
+        # Change to source directory
         cd "$GETH_SRC_DIR"
         
         # Download Go modules
         echo -e "${YELLOW}Downloading Go modules...${NC}"
-        go mod download
-        go mod tidy
+        if ! go mod download 2>&1; then
+            echo -e "${RED}✗ Failed to download Go modules${NC}"
+            cd ../..
+            exit 1
+        fi
+        
+        echo -e "${YELLOW}Tidying Go modules...${NC}"
+        if ! go mod tidy 2>&1; then
+            echo -e "${YELLOW}⚠ go mod tidy had warnings (non-critical)${NC}"
+        fi
         
         # Build Geth
+        echo ""
         echo -e "${YELLOW}Compiling Geth (this may take a few minutes)...${NC}"
-        go build -o geth ./cmd/geth
+        echo -e "${CYAN}Using Go $ACTIVE_GO_VERSION from $ACTIVE_GO${NC}"
+        echo ""
         
-        if [ -f "geth" ]; then
-            mv geth ../../
-            cd ../..
-            chmod +x geth
-            echo -e "${GREEN}✅ Geth built successfully${NC}"
+        # Capture build start time
+        BUILD_START=$(date +%s)
+        
+        # Build with verbose output for troubleshooting
+        if go build -v -o geth ./cmd/geth 2>&1 | grep -E "(^#|runtime\.stopTheWorld|error|fatal)"; then
+            # Check if build actually succeeded
+            if [ -f "geth" ]; then
+                BUILD_END=$(date +%s)
+                BUILD_TIME=$((BUILD_END - BUILD_START))
+                
+                mv geth ../../
+                cd ../..
+                chmod +x geth
+                
+                # Get binary size
+                GETH_SIZE=$(du -h geth | cut -f1)
+                
+                echo ""
+                echo -e "${GREEN}✅ Geth built successfully${NC}"
+                echo -e "${CYAN}  Build time: ${BUILD_TIME}s${NC}"
+                echo -e "${CYAN}  Binary size: ${GETH_SIZE}${NC}"
+                echo -e "${CYAN}  Go version used: ${ACTIVE_GO_VERSION}${NC}"
+                echo ""
+                
+                # Run post-build validation
+                if validate_geth_build "geth" "genesis.json" "$ACTIVE_GO_VERSION"; then
+                    echo -e "${GREEN}✅ Post-build validation passed${NC}"
+                else
+                    echo -e "${RED}✗ Post-build validation failed${NC}"
+                    echo -e "${YELLOW}The binary may not work correctly${NC}"
+                    read -p "Continue anyway? (yes/no): " continue_build
+                    if [ "$continue_build" != "yes" ]; then
+                        exit 1
+                    fi
+                fi
+            else
+                echo ""
+                echo -e "${RED}❌ Geth build failed${NC}"
+                echo -e "${YELLOW}Build completed but binary not found${NC}"
+                cd ../..
+                exit 1
+            fi
         else
+            echo ""
             echo -e "${RED}❌ Geth build failed${NC}"
+            echo -e "${YELLOW}Check the error messages above${NC}"
             cd ../..
             exit 1
         fi
@@ -153,6 +507,18 @@ if [ ! -f "geth" ]; then
     fi
 else
     echo -e "${GREEN}✅ Geth binary already exists${NC}"
+    
+    # Display existing binary info
+    if [ -x "geth" ]; then
+        GETH_SIZE=$(du -h geth | cut -f1)
+        echo -e "${CYAN}  Binary size: ${GETH_SIZE}${NC}"
+        
+        # Try to get version
+        if ./geth version &>/dev/null; then
+            GETH_VERSION=$(./geth version 2>/dev/null | head -1)
+            echo -e "${CYAN}  Version: ${GETH_VERSION}${NC}"
+        fi
+    fi
 fi
 
 echo ""
