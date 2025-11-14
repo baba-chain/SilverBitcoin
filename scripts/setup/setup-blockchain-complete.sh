@@ -83,7 +83,8 @@
 #
 ################################################################################
 
-set -e  # Exit immediately if any command fails
+# Note: We don't use 'set -e' globally because we need to handle errors gracefully
+# and continue with automatic fixes. Critical errors are handled explicitly.
 
 # Get the project root directory (2 levels up from scripts/setup/)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -161,11 +162,16 @@ fi
 echo -e "${CYAN}Checking Go installation and compatibility...${NC}"
 echo ""
 
+echo -e "${YELLOW}[DEBUG] About to call check_go_version_complete...${NC}"
+
 # Perform complete Go version check
 # Returns: 0 = compatible, 1 = not found, 2 = incompatible
 check_go_version_complete
 GO_CHECK_RESULT=$?
 
+echo -e "${YELLOW}[DEBUG] check_go_version_complete returned${NC}"
+echo ""
+echo -e "${CYAN}[DEBUG] Go check result code: $GO_CHECK_RESULT${NC}"
 echo ""
 
 # Handle different scenarios based on check result

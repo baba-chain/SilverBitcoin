@@ -274,6 +274,7 @@ display_go_version_info() {
     fi
     
     echo ""
+    return 0  # Always return success so it doesn't break script flow
 }
 
 #######################################
@@ -375,14 +376,14 @@ check_go_version_complete() {
     
     # Step 1: Detect Go installation
     if ! detect_go_version; then
-        display_go_version_info
+        display_go_version_info || true
         return 1
     fi
     
     # Step 2: Parse version string
     if ! parse_go_version; then
         echo -e "${GO_MGR_RED}✗ Failed to parse Go version${GO_MGR_NC}"
-        display_go_version_info
+        display_go_version_info || true
         return 1
     fi
     
@@ -390,15 +391,19 @@ check_go_version_complete() {
     check_go_compatibility
     local compat_result=$?
     
-    # Step 4: Validate installation
-    if ! validate_go_installation; then
-        echo -e "${GO_MGR_YELLOW}⚠ Go installation validation had issues${GO_MGR_NC}"
+    # Step 4: Validate installation (only if compatible, skip if incompatible)
+    if [ "$GO_IS_COMPATIBLE" = true ]; then
+        if ! validate_go_installation; then
+            echo -e "${GO_MGR_YELLOW}⚠ Go installation validation had issues${GO_MGR_NC}"
+        fi
+    else
+        echo -e "${GO_MGR_YELLOW}⚠ Skipping validation for incompatible version${GO_MGR_NC}"
     fi
     
-    # Step 5: Display summary
-    display_go_version_info
+    # Step 5: Display summary (but don't let it interfere with return code)
+    display_go_version_info || true
     
-    # Return appropriate code
+    # Return appropriate code based on compatibility
     if [ "$GO_IS_COMPATIBLE" = true ]; then
         return 0
     else
