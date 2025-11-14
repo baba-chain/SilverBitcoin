@@ -25,6 +25,8 @@ if [ -z "$1" ]; then
 fi
 
 NODE_NUM=$1
+# Remove leading zeros to avoid octal interpretation
+NODE_NUM=$((10#$NODE_NUM))
 NODE_DIR="nodes/Node$(printf "%02d" $NODE_NUM)"
 
 if [ ! -d "$NODE_DIR" ]; then
@@ -45,10 +47,16 @@ echo -e "${CYAN}╚════════════════════�
 ADDRESS=$(cat "$NODE_DIR/address.txt" 2>/dev/null || echo "unknown")
 echo -e "${GREEN}Address: $ADDRESS${NC}"
 
+# Get geth binary path
+GETH_BIN="$PROJECT_ROOT/geth"
+if [ ! -f "$GETH_BIN" ]; then
+    GETH_BIN="geth"  # Use system geth if local not found
+fi
+
 # Initialize genesis if needed
 if [ ! -d "$NODE_DIR/geth" ]; then
     echo -e "${ORANGE}Initializing genesis...${NC}"
-    geth --datadir "$NODE_DIR" init Blockchain/genesis.json
+    "$GETH_BIN" --datadir "$NODE_DIR" init Blockchain/genesis.json
     echo -e "${GREEN}✓ Genesis initialized${NC}"
 fi
 
@@ -64,7 +72,7 @@ if [ ! -d "$KEYSTORE_DIR" ] || [ -z "$(ls -A $KEYSTORE_DIR 2>/dev/null)" ]; then
     echo -e "${ORANGE}Importing account...${NC}"
     TEMP_KEY=$(mktemp)
     cat "$NODE_DIR/private_key.txt" | sed 's/^0x//' > "$TEMP_KEY"
-    geth account import --datadir "$NODE_DIR" --password "$PASSWORD_FILE" "$TEMP_KEY" 2>&1 | grep -i "address" || true
+    "$GETH_BIN" account import --datadir "$NODE_DIR" --password "$PASSWORD_FILE" "$TEMP_KEY" 2>&1 | grep -i "address" || true
     rm "$TEMP_KEY"
     echo -e "${GREEN}✓ Account imported${NC}"
 fi
@@ -75,12 +83,6 @@ echo -e "${GREEN}Starting node...${NC}"
 P2P_PORT=$((30303 + NODE_NUM))
 HTTP_PORT=$((8545 + NODE_NUM))
 WS_PORT=$((8546 + NODE_NUM))
-
-# Get absolute paths for geth and datadir
-GETH_BIN="$(pwd)/geth"
-if [ ! -f "$GETH_BIN" ]; then
-    GETH_BIN="geth"  # Use system geth if local not found
-fi
 
 ABS_NODE_DIR="$(cd "$NODE_DIR" && pwd)"
 ABS_PASSWORD_FILE="$ABS_NODE_DIR/password.txt"

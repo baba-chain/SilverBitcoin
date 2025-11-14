@@ -23,7 +23,7 @@ echo -e "${CYAN}║   🚀 Starting All SilverBitcoin Validator Nodes           
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 
 # Check if start-node.sh exists
-if [ ! -f "start-node.sh" ]; then
+if [ ! -f "scripts/node-management/start-node.sh" ]; then
     echo -e "${RED}❌ start-node.sh not found!${NC}"
     exit 1
 fi
