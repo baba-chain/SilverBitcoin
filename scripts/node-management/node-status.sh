@@ -24,7 +24,7 @@ echo ""
 RUNNING=0
 STOPPED=0
 
-for i in {1..25}; do
+for i in {1..10}; do
     NODE_NUM=$(printf "%02d" $i)
     NODE_DIR="nodes/Node$NODE_NUM"
     
@@ -81,7 +81,7 @@ if [ $RUNNING -gt 0 ]; then
     echo ""
     
     # Try to get block number from first running node
-    for i in {1..25}; do
+    for i in {1..10}; do
         if tmux has-session -t "node$i" 2>/dev/null; then
             HTTP_PORT=$((8545 + i))
             if command -v curl &> /dev/null; then

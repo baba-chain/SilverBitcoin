@@ -55,7 +55,7 @@ if [ -d "nodes" ]; then
 fi
 
 # Generate keys for each node
-for i in {1..25}; do
+for i in {1..10}; do
     NODE_NUM=$(printf "%02d" $i)
     NODE_DIR="nodes/Node$NODE_NUM"
     
@@ -88,7 +88,7 @@ for i in {1..25}; do
         # Note: Private key extraction requires the keystore file
         # For now, we'll just note that the keystore exists
         echo "Keystore: $KEYSTORE_FILE" > "$NODE_DIR/info.txt"
-        echo "Balance: 2,000,000 SBTC (to be allocated in genesis)" >> "$NODE_DIR/info.txt"
+        echo "Balance: 5,000,000 SBTC (to be allocated in genesis)" >> "$NODE_DIR/info.txt"
     fi
     
     echo -e "${GREEN}✅ Node$NODE_NUM: $ADDRESS${NC}"
@@ -115,11 +115,11 @@ else
     echo -e "${CYAN}Creating new alloc section...${NC}"
     
     # Start building the alloc JSON
-    # Balance: 2,000,000 SBTC = 0x1a784379d99db42000000 (hex)
-    BALANCE_HEX="0x1a784379d99db42000000"
+    # Balance: 5,000,000 SBTC = 0x422ca8b0a00a425000000 (hex)
+    BALANCE_HEX="0x422ca8b0a00a425000000"
     ALLOC_JSON="{"
     
-    for i in {1..25}; do
+    for i in {1..10}; do
         NODE_NUM=$(printf "%02d" $i)
         NODE_DIR="nodes/Node$NODE_NUM"
         
@@ -142,6 +142,22 @@ else
     
     ALLOC_JSON+="}"
     
+    # Build validator addresses list for extraData
+    VALIDATOR_ADDRESSES=""
+    for i in {1..10}; do
+        NODE_NUM=$(printf "%02d" $i)
+        NODE_DIR="nodes/Node$NODE_NUM"
+        
+        if [ -f "$NODE_DIR/address.txt" ]; then
+            ADDRESS=$(cat "$NODE_DIR/address.txt")
+            # Remove 0x prefix if exists
+            ADDRESS=${ADDRESS#0x}
+            # Convert to lowercase
+            ADDRESS=$(echo "$ADDRESS" | tr '[:upper:]' '[:lower:]')
+            VALIDATOR_ADDRESSES+="$ADDRESS"
+        fi
+    done
+    
     # Update genesis.json using Python
     python3 << EOF
 import json
@@ -158,11 +174,32 @@ try:
     # Update alloc section
     genesis['alloc'] = new_alloc
     
+    # Update extraData with validator addresses
+    # Format: 0x + 32 bytes vanity + N * 20 bytes addresses + 65 bytes seal
+    # Vanity: 32 bytes (64 hex chars) of zeros
+    # Addresses: concatenated validator addresses (20 bytes each = 40 hex chars each)
+    # Seal: 65 bytes (130 hex chars) of zeros
+    
+    validator_addresses = "$VALIDATOR_ADDRESSES"
+    vanity = "0" * 64  # 32 bytes
+    seal = "0" * 130   # 65 bytes
+    
+    extra_data = "0x" + vanity + validator_addresses + seal
+    genesis['extraData'] = extra_data
+    
+    # Update coinbase to first validator
+    if validator_addresses:
+        first_validator = "0x" + validator_addresses[:40]
+        genesis['coinbase'] = first_validator
+    
     # Write back
     with open('genesis.json', 'w') as f:
         json.dump(genesis, f, indent=2)
     
     print("✅ genesis.json updated successfully")
+    print(f"   - Updated alloc with {len(new_alloc)} validators")
+    print(f"   - Updated extraData with validator addresses")
+    print(f"   - Updated coinbase to first validator")
     sys.exit(0)
 except Exception as e:
     print(f"❌ Error updating genesis.json: {e}")
@@ -170,7 +207,14 @@ except Exception as e:
 EOF
     
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✅ genesis.json updated with all validator addresses${NC}"
+        echo ""
+        echo -e "${GREEN}✅ genesis.json updated successfully!${NC}"
+        echo ""
+        echo -e "${CYAN}Updated fields:${NC}"
+        echo -e "  ${GREEN}✓${NC} alloc - 10 validators with 5M SBTC each"
+        echo -e "  ${GREEN}✓${NC} extraData - validator addresses for consensus"
+        echo -e "  ${GREEN}✓${NC} coinbase - set to first validator"
+        echo ""
     else
         echo -e "${RED}❌ Failed to update genesis.json${NC}"
         echo -e "${YELLOW}You may need to update it manually${NC}"

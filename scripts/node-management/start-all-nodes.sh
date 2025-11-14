@@ -19,7 +19,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   🚀 Starting All SilverBitcoin Validator Nodes           ║${NC}"
+echo -e "${CYAN}║   🚀 Starting All 10 SilverBitcoin Validator Nodes        ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 
 # Check if start-node.sh exists
@@ -49,8 +49,8 @@ STARTED=0
 FAILED=0
 ALREADY_RUNNING=0
 
-# Start nodes 1-24 (skip 25 - treasury)
-for i in {1..24}; do
+# Start all 10 nodes
+for i in {1..10}; do
     echo -e "\n${ORANGE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${ORANGE}Starting Node$(printf "%02d" $i)...${NC}"
     
@@ -95,7 +95,6 @@ echo -e "  ${ORANGE}Detach from node:${NC}   Ctrl+B then D"
 echo -e "  ${ORANGE}Stop all nodes:${NC}     ./stop-all-nodes.sh"
 
 echo -e "\n${GREEN}✓ Node startup complete!${NC}"
-echo -e "${ORANGE}Note: Node25 (Treasury) is not started - it's wallet-only${NC}"
 
 # Wait a moment and check if nodes are actually running
 if [ $STARTED -gt 0 ]; then
@@ -103,7 +102,7 @@ if [ $STARTED -gt 0 ]; then
     sleep 3
     
     VERIFIED=0
-    for i in {1..24}; do
+    for i in {1..10}; do
         if tmux has-session -t "node$i" 2>/dev/null; then
             ((VERIFIED++))
         fi

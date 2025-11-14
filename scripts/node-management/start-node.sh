@@ -56,7 +56,7 @@ fi
 # Initialize genesis if needed
 if [ ! -d "$NODE_DIR/geth" ]; then
     echo -e "${ORANGE}Initializing genesis...${NC}"
-    "$GETH_BIN" --datadir "$NODE_DIR" init Blockchain/genesis.json
+    "$GETH_BIN" --datadir "$NODE_DIR" init "$PROJECT_ROOT/genesis.json"
     echo -e "${GREEN}✓ Genesis initialized${NC}"
 fi
 
@@ -66,15 +66,21 @@ if [ ! -f "$PASSWORD_FILE" ]; then
     echo "" > "$PASSWORD_FILE"
 fi
 
-# Import account if needed
+# Import account if needed (skip if keystore already exists)
 KEYSTORE_DIR="$NODE_DIR/keystore"
 if [ ! -d "$KEYSTORE_DIR" ] || [ -z "$(ls -A $KEYSTORE_DIR 2>/dev/null)" ]; then
-    echo -e "${ORANGE}Importing account...${NC}"
-    TEMP_KEY=$(mktemp)
-    cat "$NODE_DIR/private_key.txt" | sed 's/^0x//' > "$TEMP_KEY"
-    "$GETH_BIN" account import --datadir "$NODE_DIR" --password "$PASSWORD_FILE" "$TEMP_KEY" 2>&1 | grep -i "address" || true
-    rm "$TEMP_KEY"
-    echo -e "${GREEN}✓ Account imported${NC}"
+    if [ -f "$NODE_DIR/private_key.txt" ]; then
+        echo -e "${ORANGE}Importing account...${NC}"
+        TEMP_KEY=$(mktemp)
+        cat "$NODE_DIR/private_key.txt" | sed 's/^0x//' > "$TEMP_KEY"
+        "$GETH_BIN" account import --datadir "$NODE_DIR" --password "$PASSWORD_FILE" "$TEMP_KEY" 2>&1 | grep -i "address" || true
+        rm "$TEMP_KEY"
+        echo -e "${GREEN}✓ Account imported${NC}"
+    else
+        echo -e "${GREEN}✓ Keystore already exists${NC}"
+    fi
+else
+    echo -e "${GREEN}✓ Account already imported${NC}"
 fi
 
 # Start node

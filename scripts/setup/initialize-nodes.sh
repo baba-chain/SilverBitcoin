@@ -64,7 +64,7 @@ SUCCESS=0
 FAILED=0
 
 # Initialize each node
-for i in {1..25}; do
+for i in {1..10}; do
     NODE_NUM=$(printf "%02d" $i)
     NODE_DIR="nodes/Node$NODE_NUM"
     

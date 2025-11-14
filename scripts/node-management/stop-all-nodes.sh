@@ -30,7 +30,7 @@ fi
 STOPPED=0
 NOT_RUNNING=0
 
-for i in {1..25}; do
+for i in {1..10}; do
     if tmux has-session -t "node$i" 2>/dev/null; then
         echo -e "${ORANGE}Stopping Node$(printf "%02d" $i)...${NC}"
         tmux kill-session -t "node$i" 2>/dev/null || true
@@ -54,7 +54,7 @@ if [ $STOPPED -gt 0 ]; then
     sleep 2
     
     STILL_RUNNING=0
-    for i in {1..25}; do
+    for i in {1..10}; do
         if tmux has-session -t "node$i" 2>/dev/null; then
             echo -e "${RED}⚠ Node$i still running${NC}"
             ((STILL_RUNNING++))

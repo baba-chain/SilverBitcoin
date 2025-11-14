@@ -1,1 +1,0 @@
-docs/setup-guides/UBUNTU-SETUP.md

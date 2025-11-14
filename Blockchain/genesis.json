@@ -31,79 +31,34 @@
   "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
   "alloc": {
     "0xee04574c4d4dccbfdf4ff838e6f4cdb6556e4061": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0x9b1bd78b0df22e1374ed15744c3dc107b0da35ec": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0x6f3a3efd5b29430c7a666eb577c6378e9b7b6c09": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0xcce27cd0b04bec26d87efd5e1733cc0d4922f3c0": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0xe17d4643b39658cbcfb56ea9195844a6e2d4e29b": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0x2f6de9cd4ee119b92f1e9ad8df8fead395fb9505": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0x733b63d22a9967edf210f54e3fa7828e0b0eb1a4": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0xba699eb3284226d481dcbb06fa7856b3fa05d57b": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0x0172fbb152a8501bed75a11dfad335e2112812b5": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     },
     "0x303927423798fd7d0e109adeb8d5d07b98991567": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x70624c90d410f5155dbe341feae01a89cfc357a9": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x94d4134be4d3f11049077cbcfc4b2991fd1407c6": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x2e830ab9f26e63792724156ed61e4178a4aed03f": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x2c635c4278aba0a195aef0ef8ba5dd1b271853d8": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0xa22081e32654bf8fd1afe2200867996b6683a607": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0xe76c22aad677ba3babbb3917202b40f79a4fcdeb": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0xcf9c6ec5b3b69abef448fe5c27bda59a01bf9d5e": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x8898da771cefad365cb21c86da499bd6324e3c4d": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x67c8f4a5a9f02d1975e00e44f1e3fefaaaab62ff": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x4fd4cebd2644256b8fc320d1db0c224663020c42": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0xae00e3574d029c3e92567a25bfaf402ba3aef3f1": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x62b3711df2069a8848d85c1167819ffc524794ed": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0x8e899988343f94e81eff4562a3700c43604e83a3": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0xbdcdd7193d5d05c23f89239e725eeca13ab4faeb": {
-      "balance": "0x1a784379d99db42000000"
-    },
-    "0xf5b64d26e1c92d74c6815df9c0c399e8965d3e8f": {
-      "balance": "0x1a784379d99db42000000"
+      "balance": "0x422ca8b0a00a425000000"
     }
   }
 }
