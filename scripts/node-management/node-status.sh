@@ -39,7 +39,7 @@ for i in {1..10}; do
         
         # Get ports
         HTTP_PORT=$((8545 + i))
-        WS_PORT=$((8546 + i))
+        WS_PORT=$((8555 + i))
         P2P_PORT=$((30303 + i))
         
         # Check if port is actually listening
@@ -84,6 +84,7 @@ if [ $RUNNING -gt 0 ]; then
     for i in {1..10}; do
         if tmux has-session -t "node$i" 2>/dev/null; then
             HTTP_PORT=$((8545 + i))
+            WS_PORT=$((8555 + i))
             if command -v curl &> /dev/null; then
                 echo -e "${YELLOW}Checking blockchain status (Node$i)...${NC}"
                 BLOCK=$(curl -s -X POST -H "Content-Type: application/json" \

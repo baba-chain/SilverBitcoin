@@ -86,9 +86,13 @@ fi
 # Start node
 echo -e "${GREEN}Starting node...${NC}"
 
+# Port allocation: Each node gets 10 ports apart to avoid conflicts
+# Node1: HTTP=8546, WS=8556, P2P=30304
+# Node2: HTTP=8547, WS=8557, P2P=30305
+# etc.
 P2P_PORT=$((30303 + NODE_NUM))
 HTTP_PORT=$((8545 + NODE_NUM))
-WS_PORT=$((8546 + NODE_NUM))
+WS_PORT=$((8555 + NODE_NUM))
 
 ABS_NODE_DIR="$(cd "$NODE_DIR" && pwd)"
 ABS_PASSWORD_FILE="$ABS_NODE_DIR/password.txt"
