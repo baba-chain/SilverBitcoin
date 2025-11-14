@@ -213,57 +213,84 @@ case $GO_CHECK_RESULT in
         echo ""
         ;;
     2)
-        # Go is installed but incompatible version
+        # Go is installed but incompatible version - COMPLETE CLEAN REINSTALL
         echo -e "${YELLOW}⚠️  Incompatible Go version detected${NC}"
         echo -e "${CYAN}Current version: ${GO_VERSION_FULL}${NC}"
         echo -e "${CYAN}Required: Go 1.21 or 1.22${NC}"
         echo ""
-        echo -e "${YELLOW}Go 1.23+ has breaking changes that prevent Geth compilation${NC}"
-        echo -e "${YELLOW}Specifically: runtime.stopTheWorld API changes affect github.com/fjl/memsize${NC}"
+        echo -e "${YELLOW}Technical Issue:${NC}"
+        echo -e "  Go 1.23+ has breaking changes in runtime package"
+        echo -e "  The runtime.stopTheWorld API affects github.com/fjl/memsize"
+        echo -e "  This prevents Geth compilation"
+        echo ""
+        echo -e "${CYAN}Automatic Solution:${NC}"
+        echo -e "  1. Complete removal of incompatible Go ${GO_VERSION_FULL}"
+        echo -e "  2. Installation of all required build dependencies"
+        echo -e "  3. Clean installation of compatible Go 1.22"
+        echo -e "  4. System configuration for Geth build"
+        echo ""
+        echo -e "${YELLOW}Starting automatic fix...${NC}"
         echo ""
         
-        read -p "Install compatible Go version alongside current installation? (yes/no): " install_compat
+        # Step 1: Complete Go uninstallation
+        echo -e "${CYAN}═══ Phase 1: Removing Incompatible Go ═══${NC}"
+        if uninstall_go_completely "$SUDO"; then
+            echo -e "${GREEN}✅ Incompatible Go removed completely${NC}"
+        else
+            echo -e "${YELLOW}⚠ Uninstall completed with warnings${NC}"
+        fi
+        echo ""
         
-        if [ "$install_compat" = "yes" ] || [ "$install_compat" = "y" ]; then
-            echo ""
-            echo -e "${CYAN}Installing compatible Go version...${NC}"
-            echo ""
+        # Step 2: Install all build dependencies
+        echo -e "${CYAN}═══ Phase 2: Installing Build Dependencies ═══${NC}"
+        if install_all_build_dependencies "$SUDO"; then
+            echo -e "${GREEN}✅ All build dependencies installed${NC}"
+        else
+            echo -e "${YELLOW}⚠ Some dependencies may have failed${NC}"
+        fi
+        echo ""
+        
+        # Step 3: Install compatible Go
+        echo -e "${CYAN}═══ Phase 3: Installing Compatible Go 1.22 ═══${NC}"
+        if install_compatible_go "$SUDO"; then
+            echo -e "${GREEN}✅ Go 1.22 installed successfully${NC}"
             
-            if install_compatible_go "$SUDO"; then
+            # Configure system PATH
+            if [ -n "$GO_INSTALL_PATH" ]; then
                 echo ""
-                echo -e "${GREEN}✅ Compatible Go installed${NC}"
-                
-                # Configure system PATH
-                if [ -n "$GO_INSTALL_PATH" ]; then
-                    echo ""
-                    if configure_go_system_path "$GO_INSTALL_PATH" "$SUDO"; then
-                        echo -e "${GREEN}✅ Go configured in system PATH${NC}"
-                    else
-                        echo -e "${YELLOW}⚠️  Manual PATH configuration may be needed${NC}"
-                    fi
-                fi
-                
-                # Re-check to confirm
-                echo ""
-                echo -e "${CYAN}Verifying installation...${NC}"
-                if check_go_version_complete; then
-                    echo -e "${GREEN}✅ Compatible Go is now active${NC}"
+                if configure_go_system_path "$GO_INSTALL_PATH" "$SUDO"; then
+                    echo -e "${GREEN}✅ Go configured in system PATH${NC}"
                 else
-                    echo -e "${RED}✗ Verification failed${NC}"
-                    exit 1
+                    echo -e "${YELLOW}⚠️  Manual PATH configuration may be needed${NC}"
                 fi
-            else
-                echo ""
-                echo -e "${RED}✗ Failed to install compatible Go${NC}"
-                exit 1
             fi
         else
             echo ""
-            echo -e "${RED}✗ Cannot proceed without compatible Go version${NC}"
-            echo -e "${YELLOW}Please install Go 1.21 or 1.22 manually${NC}"
+            echo -e "${RED}✗ Failed to install compatible Go${NC}"
+            echo -e "${YELLOW}Please install Go 1.21 or 1.22 manually and re-run this script${NC}"
             exit 1
         fi
         echo ""
+        
+        # Step 4: Final verification
+        echo -e "${CYAN}═══ Phase 4: Verification ═══${NC}"
+        if check_go_version_complete; then
+            echo ""
+            echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
+            echo -e "${GREEN}║   ✅ System Ready for Geth Compilation                    ║${NC}"
+            echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
+            echo ""
+            echo -e "${GREEN}Summary:${NC}"
+            echo -e "${GREEN}  ✓ Incompatible Go removed${NC}"
+            echo -e "${GREEN}  ✓ All dependencies installed${NC}"
+            echo -e "${GREEN}  ✓ Go 1.22 installed and configured${NC}"
+            echo -e "${GREEN}  ✓ System verified and ready${NC}"
+            echo ""
+        else
+            echo -e "${RED}✗ Verification failed${NC}"
+            echo -e "${YELLOW}Please check the errors above${NC}"
+            exit 1
+        fi
         ;;
     *)
         echo -e "${RED}✗ Unexpected error during Go version check${NC}"

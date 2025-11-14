@@ -2845,3 +2845,455 @@ export -f get_geth_binary_info
 export -f validate_geth_genesis_access
 export -f test_geth_functionality
 export -f validate_geth_build
+
+#######################################
+# COMPLETE GO UNINSTALL MODULE
+# This section provides complete removal of Go installations
+# without leaving any residual files or configurations
+#######################################
+
+#######################################
+# Detect all Go installations on the system
+# Finds Go in all common locations
+#
+# Returns:
+#   Array of Go installation paths
+# Outputs:
+#   List of detected installations
+#######################################
+detect_all_go_installations() {
+    echo -e "${GO_MGR_CYAN}Scanning system for Go installations...${GO_MGR_NC}"
+    echo ""
+    
+    local go_paths=()
+    
+    # Common installation locations
+    local search_paths=(
+        "/usr/local/go"
+        "/usr/local/go-*"
+        "/usr/lib/go"
+        "/usr/lib/go-*"
+        "/opt/go"
+        "/opt/go-*"
+        "$HOME/go"
+        "$HOME/.go"
+    )
+    
+    for pattern in "${search_paths[@]}"; do
+        for path in $pattern; do
+            if [ -d "$path" ] && [ -f "$path/bin/go" ]; then
+                go_paths+=("$path")
+                local version=$($path/bin/go version 2>/dev/null | grep -oE 'go[0-9]+\.[0-9]+(\.[0-9]+)?' | sed 's/^go//')
+                echo -e "${GO_MGR_YELLOW}  Found: $path (Go $version)${GO_MGR_NC}"
+            fi
+        done
+    done
+    
+    # Check for APT-installed Go packages
+    if command -v dpkg &>/dev/null; then
+        echo ""
+        echo -e "${GO_MGR_CYAN}Checking APT packages...${GO_MGR_NC}"
+        local apt_packages=$(dpkg -l | grep -E "^ii\s+(golang|golang-go|golang-[0-9])" | awk '{print $2}')
+        if [ -n "$apt_packages" ]; then
+            echo -e "${GO_MGR_YELLOW}  APT packages found:${GO_MGR_NC}"
+            echo "$apt_packages" | while read pkg; do
+                echo -e "${GO_MGR_YELLOW}    - $pkg${GO_MGR_NC}"
+            done
+        fi
+    fi
+    
+    echo ""
+    echo "${go_paths[@]}"
+}
+
+#######################################
+# Remove Go installation completely
+# Removes all files, symlinks, and configurations
+#
+# Arguments:
+#   $1 - Go installation path
+#   $2 - Sudo command
+# Returns:
+#   0 on success, 1 on failure
+# Outputs:
+#   Removal progress
+#######################################
+remove_go_installation() {
+    local go_path="$1"
+    local sudo_cmd="${2:-}"
+    
+    if [ ! -d "$go_path" ]; then
+        echo -e "${GO_MGR_YELLOW}⚠ Path does not exist: $go_path${GO_MGR_NC}"
+        return 0
+    fi
+    
+    echo -e "${GO_MGR_CYAN}Removing: $go_path${GO_MGR_NC}"
+    
+    # Remove the directory
+    if $sudo_cmd rm -rf "$go_path" 2>&1; then
+        echo -e "${GO_MGR_GREEN}✓ Removed: $go_path${GO_MGR_NC}"
+        return 0
+    else
+        echo -e "${GO_MGR_RED}✗ Failed to remove: $go_path${GO_MGR_NC}"
+        return 1
+    fi
+}
+
+#######################################
+# Remove Go symlinks from system
+# Cleans up /usr/bin and /usr/local/bin symlinks
+#
+# Arguments:
+#   $1 - Sudo command
+# Outputs:
+#   Symlink removal status
+#######################################
+remove_go_symlinks() {
+    local sudo_cmd="${1:-}"
+    
+    echo -e "${GO_MGR_CYAN}Removing Go symlinks...${GO_MGR_NC}"
+    
+    local symlink_locations=("/usr/bin" "/usr/local/bin")
+    local go_tools=("go" "gofmt" "godoc")
+    
+    for location in "${symlink_locations[@]}"; do
+        for tool in "${go_tools[@]}"; do
+            local link_path="$location/$tool"
+            
+            if [ -L "$link_path" ]; then
+                local target=$(readlink "$link_path")
+                if echo "$target" | grep -q "go"; then
+                    if $sudo_cmd rm -f "$link_path" 2>/dev/null; then
+                        echo -e "${GO_MGR_GREEN}✓ Removed symlink: $link_path${GO_MGR_NC}"
+                    fi
+                fi
+            fi
+        done
+    done
+}
+
+#######################################
+# Remove Go from update-alternatives
+# Cleans up alternatives system
+#
+# Arguments:
+#   $1 - Sudo command
+# Outputs:
+#   Alternatives removal status
+#######################################
+remove_go_alternatives() {
+    local sudo_cmd="${1:-}"
+    
+    if ! command -v update-alternatives &>/dev/null; then
+        return 0
+    fi
+    
+    echo -e "${GO_MGR_CYAN}Removing Go from update-alternatives...${GO_MGR_NC}"
+    
+    local go_tools=("go" "gofmt" "godoc")
+    
+    for tool in "${go_tools[@]}"; do
+        if $sudo_cmd update-alternatives --query "$tool" &>/dev/null; then
+            # Get all alternatives and remove them
+            local alternatives=$($sudo_cmd update-alternatives --list "$tool" 2>/dev/null)
+            while IFS= read -r alt_path; do
+                if [ -n "$alt_path" ]; then
+                    $sudo_cmd update-alternatives --remove "$tool" "$alt_path" &>/dev/null
+                fi
+            done <<< "$alternatives"
+            echo -e "${GO_MGR_GREEN}✓ Removed alternatives for: $tool${GO_MGR_NC}"
+        fi
+    done
+}
+
+#######################################
+# Uninstall Go APT packages
+# Removes Go packages installed via APT
+#
+# Arguments:
+#   $1 - Sudo command
+# Returns:
+#   0 on success
+# Outputs:
+#   Package removal status
+#######################################
+uninstall_go_apt_packages() {
+    local sudo_cmd="${1:-}"
+    
+    if ! command -v apt &>/dev/null; then
+        return 0
+    fi
+    
+    echo -e "${GO_MGR_CYAN}Checking for Go APT packages...${GO_MGR_NC}"
+    
+    # Find all golang packages
+    local go_packages=$(dpkg -l | grep -E "^ii\s+(golang|golang-go|golang-[0-9])" | awk '{print $2}')
+    
+    if [ -z "$go_packages" ]; then
+        echo -e "${GO_MGR_GREEN}✓ No Go APT packages found${GO_MGR_NC}"
+        return 0
+    fi
+    
+    echo -e "${GO_MGR_YELLOW}Found Go packages:${GO_MGR_NC}"
+    echo "$go_packages" | while read pkg; do
+        echo -e "${GO_MGR_YELLOW}  - $pkg${GO_MGR_NC}"
+    done
+    echo ""
+    
+    echo -e "${GO_MGR_CYAN}Removing Go APT packages...${GO_MGR_NC}"
+    
+    # Remove packages
+    if echo "$go_packages" | xargs $sudo_cmd apt remove --purge -y 2>&1 | grep -E "(Removing|Purging)"; then
+        echo -e "${GO_MGR_GREEN}✓ Go packages removed${GO_MGR_NC}"
+        
+        # Clean up
+        $sudo_cmd apt autoremove -y &>/dev/null
+        echo -e "${GO_MGR_GREEN}✓ Cleaned up unused dependencies${GO_MGR_NC}"
+    else
+        echo -e "${GO_MGR_YELLOW}⚠ Some packages may not have been removed${GO_MGR_NC}"
+    fi
+    
+    return 0
+}
+
+#######################################
+# Clean Go environment variables and cache
+# Removes GOPATH, GOCACHE, and module cache
+#
+# Arguments:
+#   $1 - Sudo command
+# Outputs:
+#   Cleanup status
+#######################################
+clean_go_environment() {
+    local sudo_cmd="${1:-}"
+    
+    echo -e "${GO_MGR_CYAN}Cleaning Go environment and caches...${GO_MGR_NC}"
+    
+    # Clean GOPATH
+    if [ -d "$HOME/go" ]; then
+        echo -e "${GO_MGR_CYAN}Removing GOPATH: $HOME/go${GO_MGR_NC}"
+        rm -rf "$HOME/go"
+        echo -e "${GO_MGR_GREEN}✓ GOPATH removed${GO_MGR_NC}"
+    fi
+    
+    # Clean GOCACHE
+    local gocache="$HOME/.cache/go-build"
+    if [ -d "$gocache" ]; then
+        echo -e "${GO_MGR_CYAN}Removing GOCACHE: $gocache${GO_MGR_NC}"
+        rm -rf "$gocache"
+        echo -e "${GO_MGR_GREEN}✓ GOCACHE removed${GO_MGR_NC}"
+    fi
+    
+    # Clean module cache
+    local modcache="$HOME/.cache/go-mod"
+    if [ -d "$modcache" ]; then
+        echo -e "${GO_MGR_CYAN}Removing module cache: $modcache${GO_MGR_NC}"
+        rm -rf "$modcache"
+        echo -e "${GO_MGR_GREEN}✓ Module cache removed${GO_MGR_NC}"
+    fi
+}
+
+#######################################
+# Complete Go uninstallation
+# Orchestrates complete removal of all Go installations
+#
+# Arguments:
+#   $1 - Sudo command (optional)
+# Returns:
+#   0 on success
+# Outputs:
+#   Complete uninstallation process
+#######################################
+uninstall_go_completely() {
+    local sudo_cmd="${1:-}"
+    
+    # Auto-detect sudo if not provided
+    if [ -z "$sudo_cmd" ]; then
+        if [ "$EUID" -ne 0 ]; then
+            sudo_cmd="sudo"
+        else
+            sudo_cmd=""
+        fi
+    fi
+    
+    echo ""
+    echo -e "${GO_MGR_RED}╔════════════════════════════════════════════════════════════╗${GO_MGR_NC}"
+    echo -e "${GO_MGR_RED}║   Complete Go Uninstallation                               ║${GO_MGR_NC}"
+    echo -e "${GO_MGR_RED}╚════════════════════════════════════════════════════════════╝${GO_MGR_NC}"
+    echo ""
+    echo -e "${GO_MGR_YELLOW}This will remove ALL Go installations from your system${GO_MGR_NC}"
+    echo -e "${GO_MGR_YELLOW}Including: binaries, packages, caches, and configurations${GO_MGR_NC}"
+    echo ""
+    
+    # Step 1: Detect all installations
+    local go_installations=$(detect_all_go_installations)
+    echo ""
+    
+    # Step 2: Remove APT packages
+    echo -e "${GO_MGR_CYAN}═══ Step 1: Removing APT Packages ═══${GO_MGR_NC}"
+    uninstall_go_apt_packages "$sudo_cmd"
+    echo ""
+    
+    # Step 3: Remove alternatives
+    echo -e "${GO_MGR_CYAN}═══ Step 2: Removing Alternatives ═══${GO_MGR_NC}"
+    remove_go_alternatives "$sudo_cmd"
+    echo ""
+    
+    # Step 4: Remove symlinks
+    echo -e "${GO_MGR_CYAN}═══ Step 3: Removing Symlinks ═══${GO_MGR_NC}"
+    remove_go_symlinks "$sudo_cmd"
+    echo ""
+    
+    # Step 5: Remove installation directories
+    echo -e "${GO_MGR_CYAN}═══ Step 4: Removing Installation Directories ═══${GO_MGR_NC}"
+    for go_path in $go_installations; do
+        remove_go_installation "$go_path" "$sudo_cmd"
+    done
+    echo ""
+    
+    # Step 6: Clean environment
+    echo -e "${GO_MGR_CYAN}═══ Step 5: Cleaning Environment ═══${GO_MGR_NC}"
+    clean_go_environment "$sudo_cmd"
+    echo ""
+    
+    # Verification
+    echo -e "${GO_MGR_CYAN}═══ Verification ═══${GO_MGR_NC}"
+    if command -v go &>/dev/null; then
+        echo -e "${GO_MGR_YELLOW}⚠ Go command still found in PATH${GO_MGR_NC}"
+        echo -e "${GO_MGR_YELLOW}  Location: $(command -v go)${GO_MGR_NC}"
+    else
+        echo -e "${GO_MGR_GREEN}✓ Go completely removed from system${GO_MGR_NC}"
+    fi
+    echo ""
+    
+    echo -e "${GO_MGR_GREEN}╔════════════════════════════════════════════════════════════╗${GO_MGR_NC}"
+    echo -e "${GO_MGR_GREEN}║   ✅ Go Uninstallation Complete                           ║${GO_MGR_NC}"
+    echo -e "${GO_MGR_GREEN}╚════════════════════════════════════════════════════════════╝${GO_MGR_NC}"
+    echo ""
+    
+    return 0
+}
+
+#######################################
+# COMPREHENSIVE DEPENDENCY INSTALLATION MODULE
+# Installs ALL required packages for Geth compilation
+#######################################
+
+#######################################
+# Install all build dependencies
+# Comprehensive package installation for Geth build
+#
+# Arguments:
+#   $1 - Sudo command
+#   $2 - Ubuntu version (optional)
+# Returns:
+#   0 on success
+# Outputs:
+#   Installation progress
+#######################################
+install_all_build_dependencies() {
+    local sudo_cmd="${1:-}"
+    local ubuntu_version="${2:-}"
+    
+    echo ""
+    echo -e "${GO_MGR_CYAN}╔════════════════════════════════════════════════════════════╗${GO_MGR_NC}"
+    echo -e "${GO_MGR_CYAN}║   Installing All Build Dependencies                        ║${GO_MGR_NC}"
+    echo -e "${GO_MGR_CYAN}╚════════════════════════════════════════════════════════════╝${GO_MGR_NC}"
+    echo ""
+    
+    # Comprehensive package list for Geth compilation
+    local packages=(
+        # Build essentials
+        "build-essential"
+        "gcc"
+        "g++"
+        "make"
+        
+        # Version control
+        "git"
+        
+        # Network tools
+        "curl"
+        "wget"
+        
+        # Crypto libraries
+        "libssl-dev"
+        "libgmp-dev"
+        "openssl"
+        
+        # Development tools
+        "pkg-config"
+        "autoconf"
+        "automake"
+        "libtool"
+        
+        # Python (for scripts)
+        "python3"
+        "python3-pip"
+        
+        # Terminal multiplexer
+        "tmux"
+        
+        # Additional utilities
+        "ca-certificates"
+        "gnupg"
+        "lsb-release"
+    )
+    
+    echo -e "${GO_MGR_CYAN}Updating package cache...${GO_MGR_NC}"
+    if $sudo_cmd apt update -qq 2>&1 | tail -5; then
+        echo -e "${GO_MGR_GREEN}✓ Package cache updated${GO_MGR_NC}"
+    fi
+    echo ""
+    
+    echo -e "${GO_MGR_CYAN}Installing dependencies...${GO_MGR_NC}"
+    echo -e "${GO_MGR_YELLOW}This may take a few minutes${GO_MGR_NC}"
+    echo ""
+    
+    local installed=0
+    local failed=0
+    
+    for package in "${packages[@]}"; do
+        # Check if already installed
+        if dpkg -l "$package" 2>/dev/null | grep -q "^ii"; then
+            echo -e "${GO_MGR_GREEN}✓ $package (already installed)${GO_MGR_NC}"
+            ((installed++))
+        else
+            echo -e "${GO_MGR_CYAN}Installing $package...${GO_MGR_NC}"
+            if $sudo_cmd apt install -y "$package" &>/dev/null; then
+                echo -e "${GO_MGR_GREEN}✓ $package installed${GO_MGR_NC}"
+                ((installed++))
+            else
+                echo -e "${GO_MGR_RED}✗ $package failed${GO_MGR_NC}"
+                ((failed++))
+            fi
+        fi
+    done
+    
+    echo ""
+    echo -e "${GO_MGR_CYAN}Installation Summary:${GO_MGR_NC}"
+    echo -e "${GO_MGR_GREEN}  Installed/Present: $installed${GO_MGR_NC}"
+    if [ $failed -gt 0 ]; then
+        echo -e "${GO_MGR_RED}  Failed: $failed${GO_MGR_NC}"
+    fi
+    echo ""
+    
+    if [ $failed -eq 0 ]; then
+        echo -e "${GO_MGR_GREEN}✅ All dependencies installed successfully${GO_MGR_NC}"
+        return 0
+    else
+        echo -e "${GO_MGR_YELLOW}⚠ Some dependencies failed to install${GO_MGR_NC}"
+        return 1
+    fi
+}
+
+# Export uninstall and dependency functions
+export -f detect_all_go_installations
+export -f remove_go_installation
+export -f remove_go_symlinks
+export -f remove_go_alternatives
+export -f uninstall_go_apt_packages
+export -f clean_go_environment
+export -f uninstall_go_completely
+export -f install_all_build_dependencies
